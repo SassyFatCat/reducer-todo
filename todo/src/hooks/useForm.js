@@ -11,5 +11,5 @@ setValue({
 })
 }
 
-return [value, handleChange]
+return [value, setValue, handleChange]
 }

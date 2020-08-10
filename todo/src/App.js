@@ -38,13 +38,20 @@ switch(action.type) {
     return {
       ...state
     };
+
+  case "CLEAR_COMPLETED":
+    return {
+      ...state,
+      tasks: state.tasks.filter(task => task.completed === false)
+    };
+
   default:
     return state;
 }
 }
 
 function App() {
-const [value, handleChange] = useForm(initialFormState);
+const [value, setValue, handleChange] = useForm(initialFormState);
 const [state, dispatch] = useReducer(reducer, initialState);
 
   return (
@@ -58,9 +65,15 @@ const [state, dispatch] = useReducer(reducer, initialState);
           />
         <button onClick={event => {
           event.preventDefault();
-          dispatch({ type: "ADD_TODO", payload: value.todo })
+          dispatch({ type: "ADD_TODO", payload: value.todo });
+          setValue(initialFormState);
         }
         }>Add a to-do</button>
+        <button onClick={event => {
+          event.preventDefault();
+          dispatch({ type: "CLEAR_COMPLETED"});
+        }
+        }>Clear Completed</button>
       </div>
       <div>
         {state.tasks.map((item, index) => {
