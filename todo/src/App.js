@@ -1,4 +1,4 @@
-import React, {useReducer} from 'react';
+import React, {useReducer, useState} from 'react';
 import logo from './logo.svg';
 import './App.css';
 import {useForm} from './hooks/useForm';
@@ -9,12 +9,7 @@ const initialFormState = {
 }
 
 const initialState = {
-  tasks: [
-    // {
-    //   body: 'Example task',
-    //   completed: false
-    // }
-  ]
+  tasks: [],
 };
 
 /////////// REDUCER ///////////
@@ -27,11 +22,12 @@ switch(action.type) {
       tasks: [
         ...state.tasks,
         {
-          body: action.payload,
+          body: action.payload.value.todo,
           completed: false,
           id: Date.now(),
           created: new Date(),
-          timeCompleted: null
+          timeCompleted: null,
+          tags: action.payload.tags
         }
       ]
     };
@@ -60,14 +56,30 @@ switch(action.type) {
 }
 }
 
+
 function App() {
 const [value, setValue, handleChange] = useForm(initialFormState);
 const [state, dispatch] = useReducer(reducer, initialState);
+const [tags, setTags] = useState([]);
+
+const handleTags = event => {
+if (tags.indexOf(event.currentTarget.innerText) < 0)
+  setTags([
+  ...tags,
+  event.currentTarget.innerText
+  ])
+}
 
   return (
     <div className="App">
       <div>
         <h1>My Todo</h1>
+        <div style={{height: '10px', width: '30%', margin: '3% auto'}}>
+          <span onClick={handleTags} style={{backgroundColor: 'lightblue', padding: '1%', border: '1px solid black', margin: '1%'}}>Work</span>
+          <span  onClick={handleTags} style={{backgroundColor: 'lightblue', padding: '1%', border: '1px solid black', margin: '1%'}}>Leisure</span>
+          <span  onClick={handleTags} style={{backgroundColor: 'lightblue', padding: '1%', border: '1px solid black', margin: '1%'}}>Chore</span>
+          <span  onClick={handleTags} style={{backgroundColor: 'lightblue', padding: '1%', border: '1px solid black', margin: '1%'}}>Repair</span>
+        </div>
           <input
             name="todo"
             value={value.todo}
@@ -75,8 +87,9 @@ const [state, dispatch] = useReducer(reducer, initialState);
           />
         <button onClick={event => {
           event.preventDefault();
-          dispatch({ type: "ADD_TODO", payload: value.todo });
+          dispatch({ type: "ADD_TODO", payload: {value, tags }});
           setValue(initialFormState);
+          setTags([])
         }
         }>Add a to-do</button>
         <button onClick={event => {
@@ -85,6 +98,9 @@ const [state, dispatch] = useReducer(reducer, initialState);
         }
         }>Clear Completed</button>
       </div>
+      <div>{tags.map(tag => {
+        return (<span style={{backgroundColor: 'red', margin: '1%', color: 'white'}}>{tag}</span>)
+      })}</div>
       <div>
         {state.tasks.map(item => {
           const id = item.id;
@@ -102,6 +118,7 @@ const [state, dispatch] = useReducer(reducer, initialState);
                 ></input>
                 <p style={{color: 'red', fontSize: '8px'}}>{item.timeCompleted && `Completed: ${item.timeCompleted}`}</p>
                 <p style={{fontSize: '8px'}}>{`Added: ${item.created}`}</p>
+                <div>{item.tags.map(tag => {return (<span style={{backgroundColor: 'red', margin: '1%', color: 'white'}}>{tag}</span>)})}</div>
               </div>
               )
         })}
