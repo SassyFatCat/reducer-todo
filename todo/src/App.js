@@ -10,10 +10,10 @@ const initialFormState = {
 
 const initialState = {
   tasks: [
-    {
-      body: 'Example task',
-      completed: false
-    }
+    // {
+    //   body: 'Example task',
+    //   completed: false
+    // }
   ]
 };
 
@@ -28,15 +28,25 @@ switch(action.type) {
         ...state.tasks,
         {
           body: action.payload,
-          completed: false
+          completed: false,
+          id: Date.now(),
+          created: new Date(),
+          timeCompleted: null
         }
       ]
     };
   
   case "CHANGE_CHECKBOX":
-    state.tasks[action.payload.index].completed = action.payload.checked
     return {
-      ...state
+      ...state,
+      tasks: state.tasks.map(item => {
+        if (item.id === action.payload.id) {
+          item.completed = action.payload.checked;
+          item.completed ? item.timeCompleted = new Date() : item.timeCompleted = null;
+          return item
+        }
+        else return item
+      })
     };
 
   case "CLEAR_COMPLETED":
@@ -76,18 +86,22 @@ const [state, dispatch] = useReducer(reducer, initialState);
         }>Clear Completed</button>
       </div>
       <div>
-        {state.tasks.map((item, index) => {
+        {state.tasks.map(item => {
+          const id = item.id;
           return (
-              <div>
-                <span>{item.body}</span>
+              <div style={{padding: '2%', backgroundColor: 'lightblue', border: '2px solid black', width: '30%', margin: '2% auto'}}>
+                <p style={{display: 'inline'}}>{item.body}</p>
                 <input
+                  style={{display: 'inline', whiteSpace: 'nowrap'}}
                   type="checkbox"
+                  id={id}
                   onChange={event => {
-                    // debugger
                     const checked = event.currentTarget.checked;
-                    dispatch({  type: "CHANGE_CHECKBOX", payload: {checked, index}  }) 
+                    dispatch({  type: "CHANGE_CHECKBOX", payload: {checked, id}  }) 
                   }}
                 ></input>
+                <p style={{color: 'red', fontSize: '8px'}}>{item.timeCompleted && `Completed: ${item.timeCompleted}`}</p>
+                <p style={{fontSize: '8px'}}>{`Added: ${item.created}`}</p>
               </div>
               )
         })}
